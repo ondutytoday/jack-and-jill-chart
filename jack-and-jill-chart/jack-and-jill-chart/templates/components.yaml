@@ -1,0 +1,162 @@
+{{- $root := . -}}
+{{- $components := list "configurator" "ucdservice" "collector" "discovery" "notifier" "stub" "externalservicestub" "pgadmin" -}}
+{{- range $comp := $components }}
+{{- $vals := index $root.Values $comp -}}
+{{- if and $vals $vals.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jack-and-jill-chart.component.fullname" (list $root $comp) }}
+  labels:
+    {{- include "jack-and-jill-chart.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $comp }}
+spec:
+  replicas: {{ default 1 $vals.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "jack-and-jill-chart.name" $root }}
+      app.kubernetes.io/instance: {{ $root.Release.Name }}
+      app.kubernetes.io/component: {{ $comp }}
+  template:
+    metadata:
+      labels:
+        {{- include "jack-and-jill-chart.labels" $root | nindent 8 }}
+        app.kubernetes.io/component: {{ $comp }}
+      {{- with $vals.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ if $root.Values.serviceAccount.name }}{{ $root.Values.serviceAccount.name }}{{ else }}{{ include "jack-and-jill-chart.fullname" $root }}{{ end }}
+      containers:
+        - name: {{ $comp }}
+          image: {{ printf "%s:%s" (default "" $vals.image.repository) (default "" $vals.image.tag) | quote }}
+          imagePullPolicy: {{ default "IfNotPresent" $vals.image.pullPolicy }}
+          env:
+            - name: KAFKA_BROKERS
+              value: {{ default "" $root.Values.kafka.brokers | quote }}
+          {{- if eq $comp "configurator" }}
+            - name: S3_URL
+              value: {{ default "" $root.Values.s3.url | quote }}
+          {{- end }}
+          ports:
+          {{- if $vals.service }}
+            - name: http
+              containerPort: {{ default 8080 $vals.service.port }}
+          {{- else if eq $comp "pgadmin" }}
+            - name: http
+              containerPort: {{ default 80 $vals.service.port }}
+          {{- end }}
+      {{- with $vals.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $vals.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $vals.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "jack-and-jill-chart.component.fullname" (list $root $comp) }}
+  labels:
+    {{- include "jack-and-jill-chart.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $comp }}
+spec:
+  type: {{ default "ClusterIP" $vals.service.type }}
+  ports:
+    - name: http
+      port: {{ default 80 (default 80 $vals.service.port) }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ include "jack-and-jill-chart.name" $root }}
+    app.kubernetes.io/instance: {{ $root.Release.Name }}
+    app.kubernetes.io/component: {{ $comp }}
+{{- if and $vals.ingress $vals.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "jack-and-jill-chart.component.fullname" (list $root $comp) }}
+  labels:
+    {{- include "jack-and-jill-chart.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $comp }}
+  {{- with $vals.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if $vals.ingress.ingressClassName }}
+  ingressClassName: {{ $vals.ingress.ingressClassName }}
+  {{- end }}
+  rules:
+    {{- range $vals.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .backend.serviceName }}
+                port:
+                  number: {{ .backend.servicePort }}
+          {{- end }}
+    {{- end }}
+  tls:
+    {{- toYaml $vals.ingress.tls | nindent 4 }}
+{{- end }}
+{{- if and $vals.ingress2 $vals.ingress2.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "jack-and-jill-chart.component.fullname" (list $root (printf "%s-2" $comp)) }}
+  labels:
+    {{- include "jack-and-jill-chart.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $comp }}
+  {{- with $vals.ingress2.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if $vals.ingress2.ingressClassName }}
+  ingressClassName: {{ $vals.ingress2.ingressClassName }}
+  {{- end }}
+  rules:
+    {{- range $vals.ingress2.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .backend.serviceName }}
+                port:
+                  number: {{ .backend.servicePort }}
+          {{- end }}
+    {{- end }}
+  tls:
+    {{- toYaml $vals.ingress2.tls | nindent 4 }}
+{{- end }}
+{{- if eq $comp "pgadmin" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "jack-and-jill-chart.component.fullname" (list $root "pgadminconfig") }}
+data:
+  servers.json: {{ default "" $vals.config.serversjson | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

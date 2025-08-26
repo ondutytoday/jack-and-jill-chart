@@ -1,0 +1,392 @@
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+s3:
+  url: ""
+  accesskey:
+    awsParamsPath: ""
+  secretkey:
+    awsParamsPath: ""
+  bucket: ""
+  region: ""
+
+kafka:
+  brokers: bootstrap.server1:9092,bootstrap.server2:9092
+
+topics:
+  ucdKafkaTopicPtvFactReceived: ""
+  ucdKafkaTopicUcdData: ""
+  ucdKafkaTopicPtvNotification: ""
+
+statsd:
+  host: ""
+  port: ""
+
+jmxJavaOpts: ""
+
+imagePullSecrets: []
+
+configurator:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ""
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  podAnnotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-10"
+  podSecurityContext: {}
+  securityContext: {}
+  vx:
+    usTokenInternal:
+      awsParamsPath: ""
+    usTokenAdmin:
+      awsParamsPath: ""
+    euTokenInternal:
+      awsParamsPath: ""
+    euTokenAdmin:
+      awsParamsPath: ""
+    apTokenInternal:
+      awsParamsPath: ""
+    apTokenAdmin:
+      awsParamsPath: ""
+    auTokenInternal:
+      awsParamsPath: ""
+    auTokenAdmin:
+      awsParamsPath: ""
+    sandboxTokenInternal:
+      awsParamsPath: ""
+    sandboxTokenAdmin:
+      awsParamsPath: ""
+  esp:
+    usApiKey:
+      awsParamsPath: ""
+    euApiKey:
+      awsParamsPath: ""
+    apApiKey:
+      awsParamsPath: ""
+    sandboxApiKey:
+      awsParamsPath: ""
+  cx:
+    user: ""
+    secret:
+      awsParamsPath: ""
+  sl:
+    user: ""
+    password:
+      awsParamsPath: ""
+    clientId:
+      awsParamsPath: ""
+    clientSecret:
+      awsParamsPath: ""
+    sandbox:
+      user: ""
+      password:
+        awsParamsPath: ""
+      clientId:
+        awsParamsPath: ""
+      clientSecret:
+        awsParamsPath: ""
+  ati:
+    s3Accesskey:
+      awsParamsPath: ""
+    s3Secretkey:
+      awsParamsPath: ""
+  sf:
+    snowflakeUser: ""
+    snowflakePassword:
+      awsParamsPath: ""
+  config:
+    ucdFgUsername: ""
+    ucdApiUsername: ""
+    ucdFgPassword:
+      awsParamsPath: ""
+    ucdApiPassword:
+      awsParamsPath: ""
+    javaOpts: ""
+    slackAlertsDevToken:
+      awsParamsPath: ""
+    springProfilesActive: ""
+    gitConfigsUsername: ""
+    gitConfigsPassword:
+      awsParamsPath: ""
+  db:
+    password:
+      awsParamsPath: "123"
+  ingress:
+    enabled: false
+    ingressClassName: nginx-internal
+    annotations: {}
+    hosts:
+      - host: chart-example1.local
+        paths:
+          - path: /
+            backend:
+              serviceName: chart-example1.local
+              servicePort: 8888
+    tls: []
+  ingress2:
+    enabled: false
+    ingressClassName: nginx-internal
+    annotations: {}
+    hosts:
+      - host: chart-example2.local
+        paths:
+          - path: /
+            backend:
+              serviceName: chart-example2.local
+              servicePort: 8888
+    tls: []
+  service:
+    type: ClusterIP
+    port: 8888
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+ucdservice:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ""
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  config:
+    springProfilesActive: ""
+    ucdConfigService: ""
+    ucdConfigProfile: ""
+    serverPort: ""
+    javaOpts: ""
+  service:
+    type: ClusterIP
+    port: 8081
+  ingress:
+    enabled: false
+    ingressClassName: nginx-internal
+    annotations: {}
+    hosts:
+      - host: chart-example3.local
+        paths:
+          - path: /
+            backend:
+              serviceName: chart-example3.local
+              servicePort: 8080
+    tls: []
+  ingress2:
+    enabled: false
+    ingressClassName: nginx-internal
+    annotations: {}
+    hosts:
+      - host: chart-example4.local
+        paths:
+          - path: /
+            backend:
+              serviceName: chart-example4.local
+              servicePort: 8080
+    tls: []
+  resources: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+collector:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ""
+    pullPolicy: IfNotPresent
+    tag: ""
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  config:
+    springProfilesActive: ""
+    ucdConfigService: ""
+    ucdConfigProfile: ""
+    serverPort: ""
+    jmxJavaOpts: ""
+  ingress:
+    enabled: false
+    ingressClassName: nginx-internal
+    annotations: {}
+    hosts:
+      - host: chart-example5.local
+        paths:
+          - path: /
+            backend:
+              serviceName: chart-example5.local
+              servicePort: 8082
+    tls: []
+  service:
+    type: ClusterIP
+    port: 8082
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+discovery:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ""
+    pullPolicy: IfNotPresent
+    tag: ""
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  config:
+    springProfilesActive: ""
+  ingress:
+    enabled: false
+    ingressClassName: nginx-internal
+    annotations: {}
+    hosts:
+      - host: chart-example6.local
+        paths:
+          - path: /
+            backend:
+              serviceName: chart-example6.local
+              servicePort: 8761
+    tls: []
+  service:
+    type: ClusterIP
+    port: 8761
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+notifier:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ""
+    pullPolicy: IfNotPresent
+    tag: ""
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  config:
+    springProfilesActive: ""
+    ucdConfigService: ""
+    ucdConfigProfile: ""
+    javaOpts: ""
+  service:
+    type: ClusterIP
+    port: 8083
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+stub:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ""
+    pullPolicy: IfNotPresent
+    tag: ""
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  config:
+    springProfileActive: ""
+    javaOpts: ""
+  ingress:
+    enabled: false
+    ingressClassName: nginx-internal
+    annotations: {}
+    hosts:
+      - host: chart-example7.local
+        paths:
+          - path: /
+            backend:
+              serviceName: chart-example7.local
+              servicePort: 9105
+    tls: []
+  service:
+    type: ClusterIP
+    port: 9105
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+externalservicestub:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: ""
+    pullPolicy: IfNotPresent
+    tag: ""
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  config:
+    springProfileActive: ""
+    myhost: ""
+    javaOpts: ""
+  service:
+    type: ClusterIP
+    port: 9105
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+pgadmin:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: ""
+    pullPolicy: IfNotPresent
+    tag: ""
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  password:
+    awsParamsPath: ""
+  config:
+    email: ""
+    serversjson: ""
+  service:
+    type: ClusterIP
+    port: 80
+  ingress:
+    enabled: false
+    ingressClassName: nginx-internal
+    annotations: {}
+    hosts:
+      - host: chart-example8.local
+        paths:
+          - path: /
+            backend:
+              serviceName: chart-example8.local
+              servicePort: 80
+    tls: []
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
